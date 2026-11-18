@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>PC-Plus Remote Desktop</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/client.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">PC-PLUS</p>
+        <h1>Remote desktop</h1>
+        <p class="intro">Connect to a host only after its owner approves screen viewing and control.</p>
+      </header>
+
+      <section id="pairing" class="card">
+        <form id="connect-form">
+          <label for="pairing-code">One-time pairing code</label>
+          <div class="pairing-row">
+            <input id="pairing-code" name="code" inputmode="numeric" autocomplete="one-time-code"
+                   pattern="[0-9]{8}" maxlength="8" placeholder="8 digits" required>
+            <button type="submit" id="connect-button">Connect</button>
+          </div>
+          <p id="connect-error" class="form-error" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="session" class="card" hidden>
+        <div class="session-bar">
+          <p id="status" role="status" aria-live="polite">Connecting…</p>
+          <div class="actions">
+            <button id="request-button" type="button" disabled>Request access</button>
+            <button id="disconnect-button" class="secondary" type="button">Disconnect</button>
+          </div>
+        </div>
+        <div class="screen-wrap">
+          <canvas id="screen" tabindex="0" aria-label="Remote screen. Focus here to send keyboard input."></canvas>
+          <p id="screen-placeholder">The host must approve your request before screen sharing begins.</p>
+        </div>
+        <p class="hint">Keyboard and mouse are enabled only if the host separately approves control.</p>
+      </section>
+
+      <p class="notice">The relay server can see screen contents and input while connected; use only a server you trust. This prototype does not store recordings. The host can stop sharing at any time by closing its host app.</p>
+    </main>
+  </body>
+</html>
