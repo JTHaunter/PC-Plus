@@ -12,7 +12,15 @@ PC-Plus is an early, self-hosted remote desktop prototype. The host runs a small
 - The host streams its primary display; input is limited to mouse movement/clicks and keyboard events.
 - No clipboard, file transfer, remote shell, unattended access, or automatic startup.
 
-This is a prototype, not a finished installer. The host currently runs from Python source. Windows is the initial target; the capture/control libraries are cross-platform, but macOS permission flows and Linux desktop environments have not yet been validated. In particular, Wayland may restrict screen capture or input. Only the primary display is shared.
+This is a prototype, not a signed installer. The Windows host is distributed as a portable executable; no Python installation is needed on the host PC. Windows is the initial target; the capture/control libraries are cross-platform, but macOS permission flows and Linux desktop environments have not yet been validated. In particular, Wayland may restrict screen capture or input. Only the primary display is shared.
+
+## Download the Windows host
+
+Download `PC-Plus-Host.exe` from the [latest GitHub Release](https://github.com/JTHaunter/PC-Plus/releases/latest). Run it from Windows; it will ask for the HTTPS URL of a PC-Plus relay and then display a one-time browser pairing code. You can also start it from PowerShell with `PC-Plus-Host.exe --server https://your-server.example`.
+
+The relay service is not currently hosted by this repository. Until you deploy a relay you control, the executable cannot create a session. Releases are built and attached automatically when a `v*` version tag is pushed.
+
+The executable is currently unsigned, so Windows may show a SmartScreen warning. Only run builds downloaded from this repository's Releases page.
 
 ## Run locally for a smoke test
 
@@ -59,6 +67,8 @@ The broker relays screen frames and input in plaintext after terminating HTTPS/W
 ```powershell
 python -m pip install -r server\requirements-test.txt
 python -m unittest discover -s server -p test_*.py
+python -m pip install -r host\requirements.txt
+python -m unittest discover -s host -p test_*.py
 ```
 
 ## Security notes

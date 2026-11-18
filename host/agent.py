@@ -66,6 +66,24 @@ def _server_websocket_url(server_url: str, path: str) -> str:
     return f"{scheme}://{parsed.netloc}{path}"
 
 
+def _normalize_server_url(server_url: str) -> str:
+    server_url = server_url.strip().rstrip("/")
+    parsed = urlparse(server_url)
+    if (
+        parsed.scheme not in {"https", "http"}
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in {"", "/"}
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("Enter a server origin such as https://remote.example")
+    if parsed.scheme == "http" and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
+        raise ValueError("Use HTTPS except for local development on this computer")
+    return server_url
+
+
 def _ask(prompt: str) -> bool:
     try:
         return input(prompt).strip().lower() in {"y", "yes"}
@@ -247,16 +265,15 @@ def main() -> int:
     )
     parser.add_argument(
         "--server",
-        required=True,
-        help="Public HTTPS URL of your self-hosted PC-Plus server",
+        help="HTTPS URL of your self-hosted PC-Plus server (prompted if omitted)",
     )
     args = parser.parse_args()
-    server_url = args.server.rstrip("/")
-    parsed = urlparse(server_url)
-    if parsed.scheme not in {"https", "http"} or not parsed.netloc:
-        parser.error("--server must be an http:// or https:// URL")
-    if parsed.scheme == "http" and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
-        parser.error("Use HTTPS except for local development on this computer")
+    try:
+        server_url = _normalize_server_url(
+            args.server if args.server else input("PC-Plus relay URL (https://...): ")
+        )
+    except (ValueError, EOFError) as exc:
+        parser.error(str(exc) or "A relay URL is required")
     try:
         asyncio.run(run(server_url))
     except KeyboardInterrupt:

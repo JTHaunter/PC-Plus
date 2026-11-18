@@ -1,0 +1,47 @@
+name: Windows host release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install host and packaging dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r host/requirements.txt pyinstaller
+
+      - name: Build portable Windows executable
+        run: >-
+          python -m PyInstaller
+          --noconfirm
+          --clean
+          --onefile
+          --console
+          --name PC-Plus-Host
+          --collect-all pynput
+          --collect-submodules mss
+          host/agent.py
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$env:GITHUB_REF_NAME" `
+            dist/PC-Plus-Host.exe `
+            --title "PC-Plus $env:GITHUB_REF_NAME" `
+            --generate-notes
